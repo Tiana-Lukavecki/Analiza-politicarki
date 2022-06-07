@@ -29,6 +29,7 @@ library(widyr)
 library(topicmodels)
 library(ggthemes)
 library(report)
+library(dplyr)
 ```
 ```{r}
 
@@ -148,6 +149,13 @@ head(sample_n(stop_corpus,100),15)
 ```
 
 ```{r}
+raw <- list.files(path = path , pattern="xlsx")
+raw_path <- paste0(path, "/", raw)
+all_raw <- map_df(raw_path, read_excel)
+
+all <- as.data.table(all_raw)
+all <- all[,DATE := as.Date(DATE,"%Y-%m-%d")][,DATETIME := anytime(paste(DATE,TIME))]
+posts <- all
 web <- posts[SOURCE_TYPE == "web",]
 #pofb <- posts[SOURCE_TYPE == "facebook",]
 #youtube <- posts[SOURCE_TYPE == "youtube",]
@@ -180,8 +188,6 @@ dim(web)
 web %>% 
   sample_n(.,5)
 ```
-
-
 
 ```{r}
 # remove stop words, numbers, single letters, NA
@@ -448,3 +454,4 @@ idf %>%
   coord_flip() +
   theme_economist()
 ```
+
