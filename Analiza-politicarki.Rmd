@@ -31,11 +31,11 @@ library(ggthemes)
 library(report)
 library(dplyr)
 ```
+
 ```{r}
 
 path <- "C:/Users/Admin/OneDrive/Desktop"
 
-#politicarke <- readxl::read_xlsx(path)
 
 
 ```
@@ -165,7 +165,7 @@ web <- posts[SOURCE_TYPE == "web",]
 #forum <-  posts[SOURCE_TYPE == "forum",]
 #comment <-  posts[SOURCE_TYPE == "comment",]
 ```
-```{r, eval=FALSE}
+```{r, eval=T}
 
 #influencers by ACTIVITY
 print(web[,.N,FROM][order(-N)], big.mark=",")
@@ -195,6 +195,7 @@ web %>%
   anti_join(stop_corpus, by = "word") %>%
   mutate(word = gsub("\\d+", NA, word)) %>%
   mutate(word = gsub("^[a-zA-Z]$", NA, word)) -> web_tokenTidy
+
 web_tokenTidy %>%
   filter(!is.na(word)) -> web_tokenTidy
 # check
@@ -216,6 +217,7 @@ web_tokenTidy %>%
   sample_n(.,5) %>%
   datatable(., rownames = FALSE, options = list(pageLength = 5, scrollX=T))
 ```
+
 # ANALYSE
 
 
