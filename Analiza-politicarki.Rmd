@@ -35,6 +35,10 @@ library(dplyr)
 path <- "C:/Users/Admin/OneDrive/Desktop"
 ```
 # {.tabset}
+## Uvod
+### Uvod
+##### Ovaj projekt bavi se analizom sadržaja aktivnosti na webu povezanih s dvjema političarkama: Sandrom Benčić i Marijom Selak Raspudić. Navedene političarke odabrane su radi izražene aktivnosti na webu, njihove popularnosti i pripadnosti različitim političkim pozicijama (lijevo – desno).  Obrađeni podaci tiču se ukupne aktivnosti povezane s navedenim političarkama na webu u vremenskom razdoblju od 19. veljače 2022. do 30. svibnja 2022., pri čemu će naglasak biti stavljen na deskriptivnu statistiku samih objava te na njihov prikaz po aktivnosti, lajkovima, interakcijama i komentarima.  Uz navedeno, koristit će se analiza sentimenta, odnosno emocionalnog tona korištenih riječi, a kroz grafičke prikaze biti će vidljivo… Cilj ovog projekta je izložiti medijski prikaz dviju političarki te pripadajuću web aktivnost.
+
 ## Deskriptivna statistika 
 ### Broj podataka i broj varijabli
 
@@ -111,7 +115,7 @@ CroSentilex_p  <- read.delim("C:/Users/Admin/OneDrive/Desktop/crosentilex-positi
  
 Crosentilex_sve <- rbind(setDT(CroSentilex_n), setDT(CroSentilex_p))
 
-head(sample_n(Crosentilex_sve,1000),15)
+#head(sample_n(Crosentilex_sve,1000),15)
  
 CroSentilex_Gold  <- read.delim2("C:/Users/Admin/OneDrive/Desktop/crosentilex-gold.txt",
                                  header = FALSE,
@@ -124,7 +128,7 @@ CroSentilex_Gold  <- read.delim2("C:/Users/Admin/OneDrive/Desktop/crosentilex-go
  CroSentilex_Gold$sentiment <- str_replace(CroSentilex_Gold$sentiment , "\\+", "2")
  CroSentilex_Gold$sentiment <- as.numeric(unlist(CroSentilex_Gold$sentiment))
 # check lexicon data 
-head(sample_n(CroSentilex_Gold,100),15)
+#head(sample_n(CroSentilex_Gold,100),15)
 
 
  
@@ -132,7 +136,7 @@ head(sample_n(CroSentilex_Gold,100),15)
 stopwords_cro <- get_stopwords(language = "hr", source = "stopwords-iso")
 
 # check stopwords data
-head(sample_n(stopwords_cro,100),15)
+#head(sample_n(stopwords_cro,100),15)
 # extend stop words
 my_stop_words <- tibble(
   word = c(
@@ -156,7 +160,7 @@ my_stop_words <- tibble(
 stop_corpus <- my_stop_words %>%
   bind_rows(stopwords_cro)
 # check stopwords data
-head(sample_n(stop_corpus,100),15)
+#head(sample_n(stop_corpus,100),15)
 ```
 
 ```{r, echo=FALSE}
@@ -222,12 +226,12 @@ web %>%
 dim(web)
 # check
 #web %>% 
-  #sample_n(.,5)
+  #
 ```
 
 
 ### Broj podataka nakon što maknemo "stop" riječi
-#### "Stop" riječi su riječi koje smo izbacili iz analize, a to su najčešće prilozi, prijedlozi, veznici i slično. 
+"Stop" riječi su riječi koje smo izbacili iz analize, a to su najčešće prilozi, prijedlozi, veznici i slično. 
 ```{r, echo=FALSE}
 # remove stop words, numbers, single letters, NA
 web %>% 
@@ -244,78 +248,22 @@ web_tokenTidy %>%
   datatable(., rownames = FALSE, options = list(pageLength = 5, scrollX=T))
 ```
 
+
+### Grafički prikaz frekvencija korištenih riječi u "oblaku riječi"
+```{r WCloud,echo=FALSE,message=F, warning=F}
+## WordCloud(vulgaris)
+web_tokenTidy %>%
+  anti_join(CroSentilex_Gold,by="word") %>% 
+  count(word) %>% 
+  arrange(desc(n)) %>%
+  top_n(100) %>%
+  with(wordcloud(word, n, max.words = 100)) 
+```
+
+
 ## Analiza sentimenta
-
-
-### Frekvencije riječi - grafikon najčešće korištenih riječi
-```{r, echo=FALSE}
-## Most common words
-#print(web_tokenTidy[,.N,by = word][order(-N),][N > 1500], big.mark=",")
-## Vizualize most common words
-web_tokenTidy[,.N,by = word][N>1500][order(-N),][,word := reorder(word,N)] %>%
-  ggplot(aes(word, N)) +
-  geom_col() +
-  xlab(NULL) +
-  coord_flip() +
-  theme_economist()
-
-```
-
-```{r}
-## Articles per domain over time
-web_tokenTidy %>% 
-   filter(word == "hdz" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
-   mutate(WEEK = floor_date(DATE, "week")) %>%
-   group_by(WEEK, FROM) %>%
-   summarise(n = n()) %>%
-   ungroup() %>%
-   arrange(desc(n)) %>%
-   ggplot(., aes(WEEK,  n)) + 
-   geom_line() +
-   ggtitle("Korištenje riječi HDZ u člancima o Selak Raspudić i Benčić kroz vrijeme") +
-   ylab("Broj objava") +
-   geom_smooth() +
-   facet_wrap(~ FROM, scales = "free_y") +
-   theme_economist()
-```
-```{r}
-## Articles per domain over time
-web_tokenTidy %>% 
-   filter(word == "sdp" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
-   mutate(WEEK = floor_date(DATE, "week")) %>%
-   group_by(WEEK, FROM) %>%
-   summarise(n = n()) %>%
-   ungroup() %>%
-   arrange(desc(n)) %>%
-   ggplot(., aes(WEEK,  n)) + 
-   geom_line() +
-   ggtitle("Korištenje riječi SDP u člancima o Selak Raspudić i Benčić kroz vrijeme") +
-   ylab("Broj objava") +
-   geom_smooth() +
-   facet_wrap(~ FROM, scales = "free_y") +
-   theme_economist()
-```
-
-```{r}
-## Articles per domain over time
-web_tokenTidy %>% 
-   filter(word == "most" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
-   mutate(WEEK = floor_date(DATE, "week")) %>%
-   group_by(WEEK, FROM) %>%
-   summarise(n = n()) %>%
-   ungroup() %>%
-   arrange(desc(n)) %>%
-   ggplot(., aes(WEEK,  n)) + 
-   geom_line() +
-   ggtitle("Korištenje riječi most u člancima o Selak Raspudić i Benčić kroz vrijeme") +
-   ylab("Broj objava") +
-   geom_smooth() +
-   facet_wrap(~ FROM, scales = "free_y") +
-   theme_economist()
-```
-### SENTIMENT
-
-```{r sentimentTempus, message=F, warning=F}
+### Frekvencija sentimenta kroz promatrano vrijeme po tjednima
+```{r sentimentTempus, echo=FALSE,message=F, warning=F}
 ## Sentiment over time
 vizualiziraj_sentiment <- function(dataset, frq = "week") {
 dataset %>%
@@ -340,7 +288,7 @@ sm %>%
   summarise(Dnevni_sent = sum(score, na.rm = TRUE)) %>%
   ggplot(., aes(DATE, Dnevni_sent)) +
   geom_bar(stat = "identity") + 
-  ggtitle(paste0("Frekvencija sentomenta kroz vrijeme:", frq)) +
+  ggtitle(paste0("Frekvencija sentimenta kroz vrijeme:", frq)) +
   ylab("SentimentScore") +
   theme_economist()-> gg_sentiment_kroz_vrijeme_qv
 gg_sentiment_kroz_vrijeme_qv
@@ -349,8 +297,8 @@ vizualiziraj_sentiment(web_tokenTidy,"week")
 ```
 
 
-
-```{r doprinoSentimentu, message=F, warning=F, fig.width=10}
+### Frekvencije riječi po sentimentu
+```{r doprinoSentimentu,echo=FALSE,message=F, warning=F, fig.width=10}
 ## Sentiment 
 doprinos_sentimentu <- function(dataset, no = n) {
 dataset %>%
@@ -377,21 +325,12 @@ dataset %>%
 doprinos_sentimentu(web_tokenTidy,15)
 ```
 
-Simple WordCloud:
 
-```{r WCloud, message=F, warning=F}
-## WordCloud(vulgaris)
-web_tokenTidy %>%
-  anti_join(CroSentilex_Gold,by="word") %>% 
-  count(word) %>% 
-  arrange(desc(n)) %>%
-  top_n(100) %>%
-  with(wordcloud(word, n, max.words = 100)) 
-```
 
-WordCloud sentimenta:
 
-```{r WCloutSent, warning=F, message=F}
+### Grafički prikaz frenkvencija korištenih riječi u "oblaku riječi" prema sentimentu
+
+```{r WCloutSent,echo=FALSE,warning=F, message=F}
 ## ComparisonCloud
 web_tokenTidy %>%
   inner_join(CroSentilex_Gold,by="word") %>% 
@@ -406,9 +345,9 @@ web_tokenTidy %>%
 ```
 
 
-Negativity analysis of influencers:
+### Najnegativniji portali
 
-```{r negDomen, warning=F, message=F}
+```{r negDomen, echo=FALSE,warning=F, message=F}
 ## Najnegativniji portali
 wCount <- web_tokenTidy %>% 
   group_by(FROM) %>%
@@ -425,9 +364,9 @@ web_tokenTidy %>%
   print(., big.mark=",")
 ```
 
-...also positivity:
+### Najpozitivniji portali
 
-```{r pozDomen, warning=F, message=F}
+```{r pozDomen,echo=FALSE, warning=F, message=F}
 ## Najpozitivniji portali
 CroSentilex_Gold_poz <- CroSentilex_Gold %>% filter(sentiment == 2)
 web_tokenTidy %>% 
@@ -439,16 +378,11 @@ web_tokenTidy %>%
   arrange(desc(pozitivnostIndex)) %>%
   print(., big.mark=",") 
 ```
-
-
-### TERM IMPORTANCE
-
-
-
-```{r frekvencija, message=F, warning=F, fig.height=10, fig.width=10}
+### Najbitnije riječi u portalima s najvećim "dosegom" 
+```{r frekvencija, echo=FALSE, message=F, warning=F, fig.height=10, fig.width=10}
 ## Udio riječi po domenama
 domenaWords <- web_tokenTidy %>%
-  filter(FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr" )) %>% 
+  filter(FROM %in% c("direktno.hr", "index.hr", "jutarnji.hr" )) %>% 
   count(FROM, word, sort = T)
   
 ukupnoWords <- domenaWords %>%
@@ -468,18 +402,97 @@ idf %>% head(10)
 # idf %>% 
 #   select(-totWords) %>%
 #   arrange(desc(tf_idf))
-idf %>%
-  arrange(desc(tf_idf)) %>%
-  mutate(word = factor(word, levels = rev(unique(word)))) %>% 
-  mutate(FROM = factor(FROM)) %>%
-  group_by(FROM) %>% 
-  top_n(15) %>% 
-  ungroup() %>%
-  ggplot(aes(word, tf_idf, fill = FROM)) +
-  geom_col(show.legend = FALSE) +
-  labs(x = NULL, y = "tf-idf") +
-  facet_wrap(~FROM, ncol = 2, scales = "free") +
-  coord_flip() +
-  theme_economist()
+#idf %>%
+#  arrange(desc(tf_idf)) %>%
+#  mutate(word = factor(word, levels = rev(unique(word)))) %>% 
+#  mutate(FROM = factor(FROM)) %>%
+#  group_by(FROM) %>% 
+#  top_n(15) %>% 
+#  ungroup() %>%
+#  ggplot(aes(word, tf_idf, fill = FROM)) +
+#  geom_col(show.legend = FALSE) +
+#  labs(x = NULL, y = "tf-idf") +
+#  facet_wrap(~FROM, ncol = 2, scales = "free") +
+#  coord_flip() +
+#  theme_economist()
 ```
+
+
+## Usporedba podataka
+### Grafički prikaz korištenja riječi "Sandra" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+```{r, echo=FALSE}
+## Articles per domain over time
+web_tokenTidy %>% 
+   filter(word == "sandra" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   mutate(WEEK = floor_date(DATE, "week")) %>%
+   group_by(WEEK, FROM) %>%
+   summarise(n = n()) %>%
+   ungroup() %>%
+   arrange(desc(n)) %>%
+   ggplot(., aes(WEEK,  n)) + 
+   geom_line() +
+   ggtitle("Korištenje riječi Sandra u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ylab("Broj objava") +
+   geom_smooth() +
+   facet_wrap(~ FROM, scales = "free_y") +
+   theme_economist()
+```
+
+### Grafički prikaz korištenja riječi "Možemo" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+```{r, echo=FALSE}
+## Articles per domain over time
+web_tokenTidy %>% 
+   filter(word == "možemo" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   mutate(WEEK = floor_date(DATE, "week")) %>%
+   group_by(WEEK, FROM) %>%
+   summarise(n = n()) %>%
+   ungroup() %>%
+   arrange(desc(n)) %>%
+   ggplot(., aes(WEEK,  n)) + 
+   geom_line() +
+   ggtitle("Korištenje riječi možemo u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ylab("Broj objava") +
+   geom_smooth() +
+   facet_wrap(~ FROM, scales = "free_y") +
+   theme_economist()
+```
+
+### Grafički prikaz korištenja riječi "Marija" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+```{r, echo=FALSE}
+## Articles per domain over time
+web_tokenTidy %>% 
+   filter(word == "marija" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   mutate(WEEK = floor_date(DATE, "week")) %>%
+   group_by(WEEK, FROM) %>%
+   summarise(n = n()) %>%
+   ungroup() %>%
+   arrange(desc(n)) %>%
+   ggplot(., aes(WEEK,  n)) + 
+   geom_line() +
+   ggtitle("Korištenje riječi Marija u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ylab("Broj objava") +
+   geom_smooth() +
+   facet_wrap(~ FROM, scales = "free_y") +
+   theme_economist()
+```
+
+### Grafički prikaz korištenja riječi "Most" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+```{r, echo=FALSE}
+## Articles per domain over time
+web_tokenTidy %>% 
+   filter(word == "most" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   mutate(WEEK = floor_date(DATE, "week")) %>%
+   group_by(WEEK, FROM) %>%
+   summarise(n = n()) %>%
+   ungroup() %>%
+   arrange(desc(n)) %>%
+   ggplot(., aes(WEEK,  n)) + 
+   geom_line() +
+   ggtitle("Korištenje riječi most u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ylab("Broj objava") +
+   geom_smooth() +
+   facet_wrap(~ FROM, scales = "free_y") +
+   theme_economist()
+```
+
 
