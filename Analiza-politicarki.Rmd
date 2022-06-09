@@ -1,7 +1,7 @@
 ---
 title: "Analiza političarki"
 author: "Tiana"
-date: '31 05 2022 '
+date: '10 06 2022 '
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -10,7 +10,6 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T, message = F, warning = F)
 ```
-
 
 ```{r libs, include=TRUE, echo=FALSE,message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -32,14 +31,11 @@ library(report)
 library(dplyr)
 ```
 
-```{r}
-
+```{r, echo=FALSE}
 path <- "C:/Users/Admin/OneDrive/Desktop"
-
-
-
 ```
-```{r , eval=F}
+
+```{r , echo=FALSE}
 raw <- list.files(path = path , pattern="xlsx")
 raw_path <- paste0(path, "/", raw)
 all_raw <- map_df(raw_path, read_excel)
@@ -48,7 +44,6 @@ all <- as.data.table(all_raw)
 all <- all[,DATE := as.Date(DATE,"%Y-%m-%d")][,DATETIME := anytime(paste(DATE,TIME))]
 posts <- all
 
-#rm(all,all_raw)
 
 # some basic data overview
 options(digits = 2)
@@ -56,19 +51,29 @@ options(digits = 2)
 dim(posts)
 # time span
 range(posts$DATETIME)
+```
 
-# descriptives
+## Deskriptivna statistika 
+### Broj podataka i broj varijabli
+
+```{r, collapse=TRUE}
  posts[,.N,SOURCE_TYPE][order(-N)]
+```
 
-# how many letters in a title
+### Broj slova u naslovu
+```{r, collapse=TRUE}
+
 posts[,
        .(Avg = mean(nchar(TITLE), na.rm = T),
          STD = sd(nchar(TITLE), na.rm = T),
          min = min(nchar(TITLE), na.rm = T),
          max = max(nchar(TITLE), na.rm = T)),
       SOURCE_TYPE][order(-Avg),]
+```
 
-# how many letters in a text
+### Broj slova u tekstu
+```{r, collapse=TRUE}
+
 posts[,
        .(Avg = mean(nchar(FULL_TEXT)),
          STD = sd(nchar(FULL_TEXT)),
@@ -80,7 +85,7 @@ posts[,
 
 
 
-```{r leksikoni, message=F, warning=F}
+```{r leksikoni, echo=FALSE, message=F, warning=F}
 # read in lexicons
 CroSentilex_n <- read.delim("C:/Users/Admin/OneDrive/Desktop/crosentilex-negatives.txt",
                                    header = FALSE,
@@ -148,7 +153,7 @@ stop_corpus <- my_stop_words %>%
 head(sample_n(stop_corpus,100),15)
 ```
 
-```{r}
+```{r, echo=FALSE}
 raw <- list.files(path = path , pattern="xlsx")
 raw_path <- paste0(path, "/", raw)
 all_raw <- map_df(raw_path, read_excel)
@@ -156,6 +161,9 @@ all_raw <- map_df(raw_path, read_excel)
 all <- as.data.table(all_raw)
 all <- all[,DATE := as.Date(DATE,"%Y-%m-%d")][,DATETIME := anytime(paste(DATE,TIME))]
 posts <- all
+```
+
+```{r, echo=FALSE}
 web <- posts[SOURCE_TYPE == "web",]
 #pofb <- posts[SOURCE_TYPE == "facebook",]
 #youtube <- posts[SOURCE_TYPE == "youtube",]
@@ -165,18 +173,25 @@ web <- posts[SOURCE_TYPE == "web",]
 #forum <-  posts[SOURCE_TYPE == "forum",]
 #comment <-  posts[SOURCE_TYPE == "comment",]
 ```
-```{r, eval=T}
 
-#influencers by ACTIVITY
+```{r, eval=T, collapse=TRUE}
+## Portali prema aktivnosti
 print(web[,.N,FROM][order(-N)], big.mark=",")
-# influencers by REACH
+
+## Portali prema "dosegu"
 print(unique(web[,REACH := sum(REACH), FROM][FROM != "anonymous_user",.(FROM,REACH)][order(-REACH),]), big.mark=",")
-# influencers by LIKE
+
+## Portali prema lajkovima  
 print(unique(web[,LIKE := sum(LIKE_COUNT), FROM][FROM != "anonymous_user",.(FROM,LIKE)][order(-LIKE),]), big.mark=",")
-# influencers by INTERACTIONS
+
+## Portali prema interakcijama
 print(unique(web[,INTERACTIONS := sum(INTERACTIONS), FROM][FROM != "anonymous_user",.(FROM,INTERACTIONS)][order(-INTERACTIONS),]), big.mark=",")
-# influencers by COMMENT
+
+# Portali prema komentarima 
 print(unique(web[,COMMENT := sum(COMMENT_COUNT), FROM][FROM != "anonymous_user",.(FROM,COMMENT)][order(-COMMENT),]), big.mark=",")
+```
+
+```{r}
 # dim before tokenize
 dim(web)
 # tokenize
