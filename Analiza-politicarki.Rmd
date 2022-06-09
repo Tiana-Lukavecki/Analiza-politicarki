@@ -34,6 +34,9 @@ library(dplyr)
 ```{r, echo=FALSE}
 path <- "C:/Users/Admin/OneDrive/Desktop"
 ```
+# {.tabset}
+## Deskriptivna statistika 
+### Broj podataka i broj varijabli
 
 ```{r , echo=FALSE}
 raw <- list.files(path = path , pattern="xlsx")
@@ -49,19 +52,22 @@ posts <- all
 options(digits = 2)
 # data size 
 dim(posts)
+```
+
+### Vremenski raspon sakupljenih podataka
+```{r, echo=FALSE}
 # time span
 range(posts$DATETIME)
 ```
 
-## Deskriptivna statistika 
-### Broj podataka i broj varijabli
 
-```{r, collapse=TRUE}
+### Izvor podataka i broj podataka u pojedinim izvorima
+```{r, echo=FALSE}
  posts[,.N,SOURCE_TYPE][order(-N)]
 ```
 
 ### Broj slova u naslovu
-```{r, collapse=TRUE}
+```{r, echo=FALSE}
 
 posts[,
        .(Avg = mean(nchar(TITLE), na.rm = T),
@@ -72,7 +78,7 @@ posts[,
 ```
 
 ### Broj slova u tekstu
-```{r, collapse=TRUE}
+```{r, echo=FALSE}
 
 posts[,
        .(Avg = mean(nchar(FULL_TEXT)),
@@ -163,6 +169,7 @@ all <- all[,DATE := as.Date(DATE,"%Y-%m-%d")][,DATETIME := anytime(paste(DATE,TI
 posts <- all
 ```
 
+
 ```{r, echo=FALSE}
 web <- posts[SOURCE_TYPE == "web",]
 #pofb <- posts[SOURCE_TYPE == "facebook",]
@@ -174,37 +181,54 @@ web <- posts[SOURCE_TYPE == "web",]
 #comment <-  posts[SOURCE_TYPE == "comment",]
 ```
 
-```{r, eval=T, collapse=TRUE}
-## Portali prema aktivnosti
+### Portali prema aktivnosti
+```{r, eval=T, echo=FALSE}
 print(web[,.N,FROM][order(-N)], big.mark=",")
+```
 
-## Portali prema "dosegu"
-print(unique(web[,REACH := sum(REACH), FROM][FROM != "anonymous_user",.(FROM,REACH)][order(-REACH),]), big.mark=",")
+### Portali prema "dosegu"
+```{r, echo=FALSE}
+print(unique(web[,REACH := sum(REACH), FROM][FROM != "anonymous_user",.(FROM,REACH)][order(-REACH),]), big.mark=",") 
+  
+```
 
-## Portali prema lajkovima  
+### Portali prema lajkovima
+```{r, echo=FALSE}
 print(unique(web[,LIKE := sum(LIKE_COUNT), FROM][FROM != "anonymous_user",.(FROM,LIKE)][order(-LIKE),]), big.mark=",")
+```
 
-## Portali prema interakcijama
+### Portali prema interakcijama
+```{r, echo=FALSE}
 print(unique(web[,INTERACTIONS := sum(INTERACTIONS), FROM][FROM != "anonymous_user",.(FROM,INTERACTIONS)][order(-INTERACTIONS),]), big.mark=",")
+```
 
-# Portali prema komentarima 
+### Portali prema komentarima
+```{r, echo=FALSE}
 print(unique(web[,COMMENT := sum(COMMENT_COUNT), FROM][FROM != "anonymous_user",.(FROM,COMMENT)][order(-COMMENT),]), big.mark=",")
 ```
 
-```{r}
+### Broj podataka na webu
+```{r, echo=FALSE}
 # dim before tokenize
 dim(web)
+```
+
+### Broj podataka nakon tokenizacije
+```{r, echo=FALSE}
 # tokenize
 web %>% 
   unnest_tokens(word, FULL_TEXT) -> web
 # dim after tokenize
 dim(web)
 # check
-web %>% 
-  sample_n(.,5)
+#web %>% 
+  #sample_n(.,5)
 ```
 
-```{r}
+
+### Broj podataka nakon što maknemo "stop" riječi
+#### "Stop" riječi su riječi koje smo izbacili iz analize, a to su najčešće prilozi, prijedlozi, veznici i slično. 
+```{r, echo=FALSE}
 # remove stop words, numbers, single letters, NA
 web %>% 
   anti_join(stop_corpus, by = "word") %>%
@@ -214,32 +238,19 @@ web %>%
 web_tokenTidy %>%
   filter(!is.na(word)) -> web_tokenTidy
 # check
+dim(web_tokenTidy)
 web_tokenTidy %>%
   sample_n(.,5) %>%
   datatable(., rownames = FALSE, options = list(pageLength = 5, scrollX=T))
 ```
 
-``` {r}
-# remove stop words, numbers, single letters, NA
-web %>% 
-  anti_join(stop_corpus, by = "word") %>%
-  mutate(word = gsub("\\d+", NA, word)) %>%
-  mutate(word = gsub("^[a-zA-Z]$", NA, word)) -> web_tokenTidy
-web_tokenTidy %>%
-  filter(!is.na(word)) -> web_tokenTidy
-# check
-web_tokenTidy %>%
-  sample_n(.,5) %>%
-  datatable(., rownames = FALSE, options = list(pageLength = 5, scrollX=T))
-```
-
-# ANALYSE
+## Analiza sentimenta
 
 
-### BASIC FREQUENCIES
-```{r}
+### Frekvencije riječi - grafikon najčešće korištenih riječi
+```{r, echo=FALSE}
 ## Most common words
-print(web_tokenTidy[,.N,by = word][order(-N),][N > 1500], big.mark=",")
+#print(web_tokenTidy[,.N,by = word][order(-N),][N > 1500], big.mark=",")
 ## Vizualize most common words
 web_tokenTidy[,.N,by = word][N>1500][order(-N),][,word := reorder(word,N)] %>%
   ggplot(aes(word, N)) +
