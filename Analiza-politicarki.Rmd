@@ -45,7 +45,7 @@ path <- "C:/Users/Admin/OneDrive/Desktop"
 ## Uvod
 ### Uvod
 
-###### Ovaj projekt bavi se analizom sadržaja aktivnosti na webu povezanih s dvjema političarkama: Sandrom Benčić i Marijom Selak Raspudić. Navedene političarke odabrane su radi izražene aktivnosti na webu, njihove popularnosti i pripadnosti različitim političkim pozicijama (lijevo – desno).  Obrađeni podaci tiču se ukupne aktivnosti povezane s navedenim političarkama na webu u vremenskom razdoblju od 19. veljače 2022. do 30. svibnja 2022., pri čemu će naglasak biti stavljen na deskriptivnu statistiku samih objava te na njihov prikaz po aktivnosti, lajkovima, interakcijama i komentarima.  Uz navedeno, koristit će se analiza sentimenta, odnosno emocionalnog tona korištenih riječi, a kroz grafičke prikaze biti će vidljivo… Cilj ovog projekta je izložiti medijski prikaz dviju političarki te pripadajuću web aktivnost.
+##### Ovaj projekt bavi se analizom sadržaja aktivnosti na webu povezanih s dvjema političarkama: Sandrom Benčić i Marijom Selak Raspudić. Navedene političarke odabrane su radi izražene aktivnosti na webu, njihove popularnosti i pripadnosti različitim političkim pozicijama (lijevo – desno).  Obrađeni podaci tiču se ukupne aktivnosti povezane s navedenim političarkama na webu u vremenskom razdoblju od 19. veljače 2022. do 30. svibnja 2022., pri čemu će naglasak biti stavljen na deskriptivnu statistiku samih objava te prikaz portala po aktivnosti, „dosegu“, lajkovima, interakcijama i komentarima.  Uz navedeno, koristit će se analiza sentimenta, odnosno emocionalnog tona korištenih riječi, a kroz grafičke prikaze biti će vidljiva frekvencija sentimenta kroz vrijeme, prikaz najkorištenijih negativnih, neutralnih i pozitivnih riječi, kao i „wordCloud“ navedenog. Također, u analizi sentimenta biti će prikazani 10 najnegativnijih portala te pripadajućih riječi, kao i 10 najpozitivnijih portala i pripadajućih riječi, a na kraju poglavlja prikazana je tablica s najbitnijim riječima u portalima s najvećim „dosegom“.  Naposljetku biti će izložen grafički prikaz učestalosti korištenja riječi „Benčić“, „Možemo“, „Selak“ i „Most“ na trima najaktivnijim portalima te njihov potencijalni međuodnos. Cilj ovog projekta je izložiti medijski prikaz dviju političarki te pripadajuću web aktivnost.
 
 ## Deskriptivna statistika 
 ### Broj podataka i broj varijabli
@@ -248,7 +248,7 @@ dim(web)
 
 
 ### Broj podataka nakon što maknemo "stop" riječi
-"Stop" riječi su riječi koje smo izbacili iz analize, a to su najčešće prilozi, prijedlozi, veznici i slično. 
+##### "Stop" riječi su riječi koje smo izbacili iz analize, a to su najčešće prilozi, prijedlozi, veznici i slično. 
 ```{r, echo=FALSE}
 # remove stop words, numbers, single letters, NA
 web %>% 
@@ -451,8 +451,10 @@ idf %>% head(10)
 ##### Prikaz top 10 najvažnijih riječi na temu Sandre Benčić i Marije Selak Raspudić korištenih u portalima s najvećim dosegom. Vidljivi su portali, korištena riječ, koliko je navedena riječ korištena, kao i ukupan broj riječi. Portali koji su pokazali najveći doseg su: indeks.hr, direktno.hr i jutarnnji.hr.  Među njima pokazalo se da su najbitnije korištene riječi bile sljedeće: posto, HDZ, Raspudić, Benčić i Selak.
 
 ## Usporedba podataka
-### Grafički prikaz korištenja riječi "Benčić" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
-```{r, echo=FALSE}
+### Usporedba korištenja riječi "Benčić" i "Možemo"
+##### Usporedba grafičkih prikaza kod korištenja riječi **„Benčić“** i **„Možemo“** na trima najaktivnijim portalima – *Direktno.hr, GlasIstre.hr i HRT.hr* kroz navedeni vremenski okvir. Na grafovima se može uočiti paralelna krivulja rasta i pada kod korištenja riječi „Benčić“ i posebno kod korištenja riječi „Možemo“, pa se iz njihove usporedbe može zaključiti da Sandra Benčić na navedenim portalima bilježi prisutnost u vrlo sličnoj mjeri kao i „Možemo“. Navedeno nas može uputiti na to da je Benčić usko povezana sa samom strankom, te da njena popularnost nije neovisna.
+
+```{r, echo=FALSE, figures-side, fig.show="hold", out.width="50%"}
 ## Articles per domain over time
 web_tokenTidy %>% 
    filter(word == "benčić" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
@@ -468,10 +470,7 @@ web_tokenTidy %>%
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
    theme_economist()
-```
 
-### Grafički prikaz korištenja riječi "Možemo" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
-```{r, echo=FALSE}
 ## Articles per domain over time
 web_tokenTidy %>% 
    filter(word == "možemo" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
@@ -489,8 +488,10 @@ web_tokenTidy %>%
    theme_economist()
 ```
 
-### Grafički prikaz korištenja riječi "Selak" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
-```{r, echo=FALSE}
+### Usporedba riječi "Selak" i "Most"
+##### Usporedba grafičkih prikaza kod korištenja riječi **„Selak“** i **„Most“** na istim trima najaktivnijim portalima kroz navedeni vremenski okvir. Za razliku od prethodne usporedbe (Benčić – Možemo), ovdje vidimo da korištenje riječi „Selak“ na portalima nije nužno vezano uz korištenje riječi „Most“ (primjerice u travnju u glasistre.hr „Selak“ pada, dok „Most“ bilježi pad, ali i rast u istom mjesecu; isto tako na hrt.hr „Selak“ bilježi značajan rast u svibnju, dok „Most“ bilježi pad). Iz navedenog se može zaključiti da korištenje i popularnost riječi „Selak“ nije ovisno o korištenju riječi „Most“, odnosno stranka nije presudna za popularnost političarke.   
+
+```{r, echo=FALSE, fig.show="hold", out.width="50%"}
 ## Articles per domain over time
 web_tokenTidy %>% 
    filter(word == "selak" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
@@ -506,10 +507,7 @@ web_tokenTidy %>%
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
    theme_economist()
-```
 
-### Grafički prikaz korištenja riječi "Most" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
-```{r, echo=FALSE}
 ## Articles per domain over time
 web_tokenTidy %>% 
    filter(word == "most" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
