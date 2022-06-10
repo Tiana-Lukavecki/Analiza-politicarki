@@ -1,11 +1,18 @@
 ---
 title: "Analiza političarki"
-author: "Tiana"
+author: "Tiana i Tea"
 date: '10 06 2022 '
 output: html_document
 editor_options: 
   chunk_output_type: console
 ---
+
+<style>
+    pre {
+        border: 0;
+    }
+</style>
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T, message = F, warning = F)
@@ -37,7 +44,8 @@ path <- "C:/Users/Admin/OneDrive/Desktop"
 # {.tabset}
 ## Uvod
 ### Uvod
-##### Ovaj projekt bavi se analizom sadržaja aktivnosti na webu povezanih s dvjema političarkama: Sandrom Benčić i Marijom Selak Raspudić. Navedene političarke odabrane su radi izražene aktivnosti na webu, njihove popularnosti i pripadnosti različitim političkim pozicijama (lijevo – desno).  Obrađeni podaci tiču se ukupne aktivnosti povezane s navedenim političarkama na webu u vremenskom razdoblju od 19. veljače 2022. do 30. svibnja 2022., pri čemu će naglasak biti stavljen na deskriptivnu statistiku samih objava te na njihov prikaz po aktivnosti, lajkovima, interakcijama i komentarima.  Uz navedeno, koristit će se analiza sentimenta, odnosno emocionalnog tona korištenih riječi, a kroz grafičke prikaze biti će vidljivo… Cilj ovog projekta je izložiti medijski prikaz dviju političarki te pripadajuću web aktivnost.
+
+###### Ovaj projekt bavi se analizom sadržaja aktivnosti na webu povezanih s dvjema političarkama: Sandrom Benčić i Marijom Selak Raspudić. Navedene političarke odabrane su radi izražene aktivnosti na webu, njihove popularnosti i pripadnosti različitim političkim pozicijama (lijevo – desno).  Obrađeni podaci tiču se ukupne aktivnosti povezane s navedenim političarkama na webu u vremenskom razdoblju od 19. veljače 2022. do 30. svibnja 2022., pri čemu će naglasak biti stavljen na deskriptivnu statistiku samih objava te na njihov prikaz po aktivnosti, lajkovima, interakcijama i komentarima.  Uz navedeno, koristit će se analiza sentimenta, odnosno emocionalnog tona korištenih riječi, a kroz grafičke prikaze biti će vidljivo… Cilj ovog projekta je izložiti medijski prikaz dviju političarki te pripadajuću web aktivnost.
 
 ## Deskriptivna statistika 
 ### Broj podataka i broj varijabli
@@ -57,18 +65,20 @@ options(digits = 2)
 # data size 
 dim(posts)
 ```
+##### Prikaz ukupnog broja dobivenih podataka nad kojima je započeta analiza – 2 202, kao i prikaz ukupnog broja uvrštenih varijabli - 49. 
 
 ### Vremenski raspon sakupljenih podataka
 ```{r, echo=FALSE}
 # time span
 range(posts$DATETIME)
 ```
-
+##### Obrađeni podaci tiču se vremenskog perioda od 19. veljače 2022. do 30. svibnja 2022.
 
 ### Izvor podataka i broj podataka u pojedinim izvorima
 ```{r, echo=FALSE}
  posts[,.N,SOURCE_TYPE][order(-N)]
 ```
+##### Prikaz svih aktivnosti vezanih uz navedenu temu te njihov broj u navedenim izvorima. Najveća aktivnost primjetna je na webu (1 823 objava), a najmanja na Instagramu (2 objave).
 
 ### Broj slova u naslovu
 ```{r, echo=FALSE}
@@ -80,6 +90,7 @@ posts[,
          max = max(nchar(TITLE), na.rm = T)),
       SOURCE_TYPE][order(-Avg),]
 ```
+##### Navedeni podaci prikazuju različite medije te deskriptivnu statistiku broja slova u naslovu objave (uključuje: prosjek, standardnu devijaciju, minimalnu i maksimalnu vrijednost). Po broju slova prvi je Instagram (prosjek 346), s vrlo malom razlikom između minimalnog i maksimalnog broja slova u naslovu (min – 342, max – 350),  dok su najkraći komentari (prosjek 27). Najveća standardna devijacija pojavljuje se na Redditu (std 218) i Twitteru (std 214), a najmanja na Instagramu (std 5,7).
 
 ### Broj slova u tekstu
 ```{r, echo=FALSE}
@@ -92,7 +103,7 @@ posts[,
       SOURCE_TYPE][order(-Avg),]
 
 ```
-
+##### Prikaz deskriptivne statistike slova u tekstu u različitim izvorima. Vidljiv je najveći prosjek u dužini teksta na Webu, a najmanji – nepostojeći na Redditu (NA). Najveće odstupanje pojavljuje se na Webu (std 3047), a najmanja ponovno na Redditu. 
 
 
 ```{r leksikoni, echo=FALSE, message=F, warning=F}
@@ -189,33 +200,39 @@ web <- posts[SOURCE_TYPE == "web",]
 ```{r, eval=T, echo=FALSE}
 print(web[,.N,FROM][order(-N)], big.mark=",")
 ```
+##### Prikaz top 5 portala prema aktivnosti na temu Sande Benčić i Marije Selak Raspudić, kao i broj njihovih objava, te zadnjih 5 portala i broj njihovih objava. Na prvom mjestu nalazi se *glasistre.hr* s 87 objava, a odmah iza direktno.hr i hrt.hr. Na zadnjem mjestu nalazi se više portala s jednom objavom – *ntvarena.com, mariborskiodmev.com…*
 
 ### Portali prema "dosegu"
 ```{r, echo=FALSE}
 print(unique(web[,REACH := sum(REACH), FROM][FROM != "anonymous_user",.(FROM,REACH)][order(-REACH),]), big.mark=",") 
   
 ```
+##### Prikaz prvih i zadnjih 5 portala prema dosegu ili reachu na navedenu temu, pri čemu je vodeći *indeks.hr*, a zadnje mjesto ponovno dijeli više portala – reach 0 (*hdz.hr, budimpress.ba…*).    
 
 ### Portali prema lajkovima
 ```{r, echo=FALSE}
 print(unique(web[,LIKE := sum(LIKE_COUNT), FROM][FROM != "anonymous_user",.(FROM,LIKE)][order(-LIKE),]), big.mark=",")
 ```
+##### Prikaz prvih i zadnjih 5 portala po broju lajkova na navedenu temu. Vodeći portal prema broju lajkova je *indeks.hr* – 10 474, a prate ga *n1info.com* – 8 006, *telegram.hr*, *direktno.hr* i *vecernji.hr*. Bez lajkova na navedenu temu ima više portala, no zadnji u podacima se prikazao *ntvarena.com* – 0 lajkova.
 
 ### Portali prema interakcijama
 ```{r, echo=FALSE}
 print(unique(web[,INTERACTIONS := sum(INTERACTIONS), FROM][FROM != "anonymous_user",.(FROM,INTERACTIONS)][order(-INTERACTIONS),]), big.mark=",")
 ```
+##### Prikaz portala na navedenu temu prema broju komentara. Najveći broj komentara – 5 527 zabilježen je na portalu *priznajem.hr*, a bez komentara su portali *ntvarena.com*, *mariboraskiodmev.com*, *cdm.me*.  
 
 ### Portali prema komentarima
 ```{r, echo=FALSE}
 print(unique(web[,COMMENT := sum(COMMENT_COUNT), FROM][FROM != "anonymous_user",.(FROM,COMMENT)][order(-COMMENT),]), big.mark=",")
 ```
+##### Prikaz portala na navedenu temu prema broju komentara. Najveći broj komentara – 5 527 zabilježen je na portalu priznajem.hr, a bez komentara su portali *ntvarena.com*, *mariboraskiodmev.com*, *cdm.me*.  
 
 ### Broj podataka na webu
 ```{r, echo=FALSE}
 # dim before tokenize
 dim(web)
 ```
+##### Prikaz aktivnosti na webu vezano uz Sandru Benčić i Mariju Selak Raspudić te broj varijabli (49). 
 
 ### Broj podataka nakon tokenizacije
 ```{r, echo=FALSE}
@@ -250,6 +267,8 @@ web_tokenTidy %>%
 
 
 ### Grafički prikaz frekvencija korištenih riječi u "oblaku riječi"
+
+##### U Oblaku riječi prikazana je učestalost korištenih riječi u portalima, pri čemu se najveće riječi upotrebljavaju najviše puta – u ovom slučaju to su: *posto, HDZ, vlade, Raspudić, Benčić, SDP, Plenković, Selak…*
 ```{r WCloud,echo=FALSE,message=F, warning=F}
 ## WordCloud(vulgaris)
 web_tokenTidy %>%
@@ -263,6 +282,15 @@ web_tokenTidy %>%
 
 ## Analiza sentimenta
 ### Frekvencija sentimenta kroz promatrano vrijeme po tjednima
+
+##### Grafički prikaz sentimenata na navedenu temu u vremenskom periodu od sredine veljače do kraja svibnja. U analizi vrijednost 0 označava neutralno, 1 negativno, a 2 pozitivno. Primjetno je da je kroz veljaču i ožujak sentiment više negativnog tona, dok tijekom travnja prevladava pozitivni sentiment, koji opet postaje negativni tijekom svibnja.
+
+##### **Što se događalo?**
+###### Veljača -> uhićenje ministara (Horvat), istrage, afere (Ćorić), „pad“ vlade, traženje novog ministara, početak rata u Ukrajini.
+###### Ožujak -> Opoziv ministara, pad drona kod Jaruna, pitanje korištenja novca iz EU fondova, zahtjev za rekonstrukcijom Vlade, Selak Raspudić trudna, pitanje spore obnove.
+###### Travanj -> Afere, Možemo pobijedio DORH (tužba radi previše žena na listi), rekonstrukcija Vlade, kritika Milanovića i Plenkovića.
+###### Svibanj -> Rasprave o raspuštanju Sabora, rasprava o Zakonu o pobačaju, slučaj Mirele Čavajde, prosvjed.  
+
 ```{r sentimentTempus, echo=FALSE,message=F, warning=F}
 ## Sentiment over time
 vizualiziraj_sentiment <- function(dataset, frq = "week") {
@@ -298,6 +326,7 @@ vizualiziraj_sentiment(web_tokenTidy,"week")
 
 
 ### Frekvencije riječi po sentimentu
+##### Grafički prikaz top 15 najnegativnijih, neutralnih i najpozitivnijih riječi korištenih u objavama i njihova učestalost pojavljivanja. Vidimo da je najveća učestalost korištenja neutralnih riječi (*ministar, vlada, premijer…*), a među negativnim riječima ističu se: *problem, rat, prekid, afera....* Među pozitivnim riječima ističu se: *tim, imati, život, obnova…*
 ```{r doprinoSentimentu,echo=FALSE,message=F, warning=F, fig.width=10}
 ## Sentiment 
 doprinos_sentimentu <- function(dataset, no = n) {
@@ -329,6 +358,7 @@ doprinos_sentimentu(web_tokenTidy,15)
 
 
 ### Grafički prikaz frenkvencija korištenih riječi u "oblaku riječi" prema sentimentu
+##### Prikaz prethodno navedenih top 15 negativnih, neutralnih i pozitivnih riječi u oblaku.
 
 ```{r WCloutSent,echo=FALSE,warning=F, message=F}
 ## ComparisonCloud
@@ -346,7 +376,6 @@ web_tokenTidy %>%
 
 
 ### Najnegativniji portali
-
 ```{r negDomen, echo=FALSE,warning=F, message=F}
 ## Najnegativniji portali
 wCount <- web_tokenTidy %>% 
@@ -363,6 +392,7 @@ web_tokenTidy %>%
   arrange(desc(negativnostIndex)) %>%
   print(., big.mark=",")
 ```
+##### Prikaz „najnegativnijih“ portala, odnosno onih koji su koristili najviše negativnih riječi. Vidljivi su portali, broj korištenih negativnih riječi, ukupan broj riječi te indeks negativnosti. Izdvojeno je prvih 10 najnegativnijih portala, gdje prvo mjestu po negativnosti zauzima 360hr.news s korištenih 27 negativnih riječi od njih sveukupno 723 i indexom negativnosti od 3.73. Iza slijede zupanjac.net, mojabih.live, novo.hr…
 
 ### Najpozitivniji portali
 
@@ -378,6 +408,8 @@ web_tokenTidy %>%
   arrange(desc(pozitivnostIndex)) %>%
   print(., big.mark=",") 
 ```
+##### Prikaz „najpozitivnijih“ portala, odnosno onih koji su koristili najviše pozitivnih riječi na navedenu temu. Navedena su imena portala, broj korištenih pozitivnih riječi, ukupan broj riječi i indeks pozitivnosti. Izdvojeno je top 10 najpozitivnijih portala, a na prvom mjestu je dubrovnikinsider.hr s indeksom pozitivnosti 4.74 i 9 pozitivnih riječi, a prate ga 24vesti.com i medjugorje-info.com. 
+
 ### Najbitnije riječi u portalima s najvećim "dosegom" 
 ```{r frekvencija, echo=FALSE, message=F, warning=F, fig.height=10, fig.width=10}
 ## Udio riječi po domenama
@@ -416,14 +448,14 @@ idf %>% head(10)
 #  coord_flip() +
 #  theme_economist()
 ```
-
+##### Prikaz top 10 najvažnijih riječi na temu Sandre Benčić i Marije Selak Raspudić korištenih u portalima s najvećim dosegom. Vidljivi su portali, korištena riječ, koliko je navedena riječ korištena, kao i ukupan broj riječi. Portali koji su pokazali najveći doseg su: indeks.hr, direktno.hr i jutarnnji.hr.  Među njima pokazalo se da su najbitnije korištene riječi bile sljedeće: posto, HDZ, Raspudić, Benčić i Selak.
 
 ## Usporedba podataka
-### Grafički prikaz korištenja riječi "Sandra" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+### Grafički prikaz korištenja riječi "Benčić" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
 ```{r, echo=FALSE}
 ## Articles per domain over time
 web_tokenTidy %>% 
-   filter(word == "sandra" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   filter(word == "benčić" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
    mutate(WEEK = floor_date(DATE, "week")) %>%
    group_by(WEEK, FROM) %>%
    summarise(n = n()) %>%
@@ -431,7 +463,7 @@ web_tokenTidy %>%
    arrange(desc(n)) %>%
    ggplot(., aes(WEEK,  n)) + 
    geom_line() +
-   ggtitle("Korištenje riječi Sandra u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ggtitle("Korištenje riječi Benčić na portalima") +
    ylab("Broj objava") +
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
@@ -450,18 +482,18 @@ web_tokenTidy %>%
    arrange(desc(n)) %>%
    ggplot(., aes(WEEK,  n)) + 
    geom_line() +
-   ggtitle("Korištenje riječi možemo u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ggtitle("Korištenje riječi Možemo na portalima") +
    ylab("Broj objava") +
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
    theme_economist()
 ```
 
-### Grafički prikaz korištenja riječi "Marija" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
+### Grafički prikaz korištenja riječi "Selak" u portalima Direktno.hr, HRT.hr i GlasIstre.hr
 ```{r, echo=FALSE}
 ## Articles per domain over time
 web_tokenTidy %>% 
-   filter(word == "marija" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
+   filter(word == "selak" & FROM %in% c("direktno.hr", "hrt.hr", "glasistre.hr")) %>%
    mutate(WEEK = floor_date(DATE, "week")) %>%
    group_by(WEEK, FROM) %>%
    summarise(n = n()) %>%
@@ -469,7 +501,7 @@ web_tokenTidy %>%
    arrange(desc(n)) %>%
    ggplot(., aes(WEEK,  n)) + 
    geom_line() +
-   ggtitle("Korištenje riječi Marija u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ggtitle("Korištenje riječi Selak na portalima") +
    ylab("Broj objava") +
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
@@ -488,7 +520,7 @@ web_tokenTidy %>%
    arrange(desc(n)) %>%
    ggplot(., aes(WEEK,  n)) + 
    geom_line() +
-   ggtitle("Korištenje riječi most u člancima o Selak Raspudić i Benčić kroz vrijeme") +
+   ggtitle("Korištenje riječi Most na portalima") +
    ylab("Broj objava") +
    geom_smooth() +
    facet_wrap(~ FROM, scales = "free_y") +
